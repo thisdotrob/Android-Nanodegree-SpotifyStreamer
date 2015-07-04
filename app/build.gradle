@@ -1,0 +1,42 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        applicationId "com.example.android.spotifystreamer"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+// Point application to the libs folder for the Spotify web API wrapper .aar
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.2.0'
+
+    // Dependencies required for the Spotify web API wrapper
+    compile(name:'spotify-web-api-android-0.1.0', ext:'aar')
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.squareup.okhttp:okhttp:2.2.0'
+
+    // Picasso dependency (for handling image loading and caching)
+    compile 'com.squareup.picasso:picasso:2.5.2'
+}
