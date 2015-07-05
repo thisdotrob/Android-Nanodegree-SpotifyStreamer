@@ -3,13 +3,14 @@ package com.example.android.spotifystreamer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import java.util.List;
 
@@ -24,7 +25,9 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class MainActivityFragment extends Fragment {
 
+    private RecyclerView mRecyclerView;
     private ArtistsAdapter mArtistAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     public MainActivityFragment() {
     }
@@ -38,8 +41,13 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
-        final EditText etSearchQuery = (EditText) v.findViewById(R.id.etSearchQuery);
 
+        // Set the layout manager for the RecyclerView
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.rvSearchResults);
+        mLayoutManager = new LinearLayoutManager(v.getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        final EditText etSearchQuery = (EditText) v.findViewById(R.id.etSearchQuery);
         etSearchQuery.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -49,8 +57,8 @@ public class MainActivityFragment extends Fragment {
                     SearchSpotifyTask task = new SearchSpotifyTask();
                     task.execute(query);
                 } else {
-                    if(mArtistAdapter != null) {
-                        mArtistAdapter.clear();
+                    if(mRecyclerView != null) {
+                        mRecyclerView.removeAllViews();
                     }
                 }
             }
@@ -76,12 +84,11 @@ public class MainActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Artist> artistList) {
 
-            // initialize the adapter
-            mArtistAdapter = new ArtistsAdapter(getActivity(),artistList);
+            View v = getView();
 
-            // Attach the adapter to the ListView
-            ListView listView = (ListView) getView().findViewById(R.id.lvSearchResults);
-            listView.setAdapter(mArtistAdapter);
+            // Set the adapter on the RecyclerView
+            mArtistAdapter = new ArtistsAdapter(artistList);
+            mRecyclerView.setAdapter(mArtistAdapter);
 
         }
     }

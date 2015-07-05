@@ -2,8 +2,6 @@ package com.example.android.spotifystreamer;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -39,23 +37,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    // Listener
-    private class searchTextWatcher implements TextWatcher {
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            String artist = editTextSearchQuery.getText().toString().trim();
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {}
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
     }
 
 }
