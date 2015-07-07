@@ -2,4 +2,11 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- Size of thumbnail in the artists search results list -->
+    <dimen name="thumbnail_size">75dp</dimen>
+
+    <dimen name="item_vert_padding">16dp</dimen>
+    <dimen name="item_hori_padding">16dp</dimen>
+    <dimen name="item_text_padding_left">16dp</dimen>
 </resources>

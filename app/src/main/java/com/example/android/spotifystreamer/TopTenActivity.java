@@ -6,18 +6,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends AppCompatActivity {
+public class TopTenActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_top_ten);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_top_ten, menu);
         return true;
     }
 
@@ -33,7 +33,13 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        // Set home action to be same as for back button, in order to retain artist search
+        // results when navigating back from Top 10 activity.
+        if (id == android.R.id.home) {
+            this.onBackPressed();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
-
 }
