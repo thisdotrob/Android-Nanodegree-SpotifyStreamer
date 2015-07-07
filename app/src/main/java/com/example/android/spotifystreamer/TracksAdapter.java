@@ -9,9 +9,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-import kaaes.spotify.webapi.android.models.Image;
-import kaaes.spotify.webapi.android.models.Track;
+import java.util.ArrayList;
 
 
 /**
@@ -19,15 +17,12 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder> {
 
-    // Image width & height in pixels
-    private static final int IMAGE_SIZE = 200;
-
     // The dataset to be displayed
-    private List<Track> tracks;
+    private ArrayList<ParcelableTrack> trackList;
 
     // Constructor
-    public TracksAdapter(List<Track> tracks){
-        this.tracks = tracks;
+    public TracksAdapter(ArrayList<ParcelableTrack> trackList){
+        this.trackList = trackList;
     }
 
     // Create new views (invoked by the layout manager)
@@ -45,57 +40,25 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-
         // Get data for this track
-        Track track = tracks.get(position);
-
+        ParcelableTrack track = trackList.get(position);
         // Set the track name
-        holder.tvTrack.setText(track.name);
-
+        holder.tvTrack.setText(track.getName());
         // Set the album name
-        holder.tvAlbum.setText(track.album.name);
-
+        holder.tvAlbum.setText(track.getAlbumName());
         // Set the track thumbnail
-        List<Image> imageList = track.album.images;
-        int numImages = imageList.size();
-        if (numImages > 0) {
-            Image bestImage = getBestImage(imageList, numImages);
-            Picasso.with(holder.ivTrack.getContext())
-                    .load(bestImage.url)
-                    .resize(200, 200)
-                    .centerInside()
-                    .into(holder.ivTrack);
-        }
-    }
-
-    // Method to return the image that most closely matches the desired size (according to
-    // IMAGE_SIZE constant.
-    private Image getBestImage(List<Image> imageList, int numImages){
-
-        // Initially set returned image to first in the list
-        Image bestImage = imageList.get(0);
-
-        // If the list contains more than one image, see if any of them are closer in size
-        // to the desired IMAGE_SIZE. Whichever is closest gets set as the returned image.
-        if(numImages > 1) {
-            int varToReqSize = Math.abs(IMAGE_SIZE - bestImage.width);
-            for(int i = 1; i < numImages; i++){
-                Image image = imageList.get(i);
-                int newVarToReqSize = Math.abs(IMAGE_SIZE - image.width);
-                if (newVarToReqSize < varToReqSize) {
-                    varToReqSize = newVarToReqSize;
-                    bestImage = image;
-                }
-            }
-        }
-
-        return bestImage;
+        int imageSize = track.getImageSize();
+        Picasso.with(holder.ivTrack.getContext())
+                .load(track.getImageURL())
+                .resize(imageSize, imageSize)
+                .centerInside()
+                .into(holder.ivTrack);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return tracks.size();
+        return trackList.size();
     }
 
     // Inner class to provide references to the views for each item in the layout

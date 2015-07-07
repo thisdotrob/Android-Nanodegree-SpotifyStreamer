@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +29,8 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  * takes a search query which it uses to retrieve and display a list of matching artists.
  */
 public class MainActivityFragment extends Fragment {
+
+    private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     // Instance variables for the RecyclerView and its adapter.
     // Required to allow access in both onCreateView method, and in SearchSpotifyTask inner class.
@@ -100,6 +103,7 @@ public class MainActivityFragment extends Fragment {
 
         @Override
         protected List<Artist> doInBackground(String...query) {
+            Log.d(LOG_TAG, "getting data from spotify");
             SpotifyApi api = new SpotifyApi();
             SpotifyService service = api.getService();
             ArtistsPager pager = service.searchArtists(query[0]);
