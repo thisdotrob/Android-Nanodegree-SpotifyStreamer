@@ -1,6 +1,5 @@
 package com.example.android.spotifystreamer;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,14 +11,15 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyError;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
+import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.Callback;
 import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 /**
@@ -38,6 +38,8 @@ public class TopTenActivityFragment extends Fragment {
     private String artistId;
     // Stores the list of tracks and associated variables
     private ArrayList<ParcelableTrack> trackList;
+    // Constant for the country code used when requesting the top 10 tracks from Spotify API
+    private static final String SEARCH_COUNTRY = "GB";
 
     // Default constructor
     public TopTenActivityFragment() {
@@ -66,10 +68,40 @@ public class TopTenActivityFragment extends Fragment {
             trackList = savedInstanceState.getParcelableArrayList(STATE_TRACKS);
             setAdapter();
         } else {
-            SearchSpotifyTask task = new SearchSpotifyTask();
-            task.execute(artistId);
-        }
+            Map<String, Object> options = new HashMap<>();
+            options.put("country", SEARCH_COUNTRY);
+            SpotifyApi api = new SpotifyApi();
+            SpotifyService service = api.getService();
+            service.getArtistTopTrack(artistId, options, new Callback<Tracks>() {
+                @Override
+                public void success(final Tracks tracks, Response response) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                                // Convert the List<Track> into a ArrayList<ParcelableTrack>, store in the private
+                                // instance variable in the outer class and set the adapter on the RecyclerView.
+                                trackList = new ArrayList<>();
+                                int imgSizeInPixels = (int) getResources().getDimension(
+                                        R.dimen.thumbnail_size);
+                                for(Track track : tracks.tracks){
+                                    trackList.add(new ParcelableTrack(track,imgSizeInPixels));
+                                }
+                                setAdapter();
+                        }
+                    });
+                }
 
+                @Override
+                public void failure(final RetrofitError error) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.e(LOG_TAG, error.getMessage());
+                        }
+                    });
+                }
+            });
+        }
         return v;
     }
 
@@ -83,46 +115,5 @@ public class TopTenActivityFragment extends Fragment {
     private void setAdapter() {
         TracksAdapter mTracksAdapter = new TracksAdapter(trackList);
         mRecyclerView.setAdapter(mTracksAdapter);
-    }
-
-    // AsyncTask, takes in a String parameter (the artist name to search for), uses this to query
-    // the Spotify web API and populates the artist's top 10 tracks in the RecyclerView adapter.
-    private class SearchSpotifyTask extends AsyncTask<String, Void, List<Track>> {
-
-
-
-        // Constant for the country code used when requesting the top 10 tracks
-        // from the Spotify web API.
-        private static final String SEARCH_COUNTRY = "GB";
-
-        @Override
-        protected List<Track> doInBackground(String...query) {
-            // Get top 10 tracks from Spotify web api
-            try {
-                SpotifyApi api = new SpotifyApi();
-                SpotifyService service = api.getService();
-                Map<String, Object> options = new HashMap<>();
-                options.put("country", SEARCH_COUNTRY);
-                return service.getArtistTopTrack(query[0], options).tracks;
-            } catch (RetrofitError error) {
-                SpotifyError spotifyError = SpotifyError.fromRetrofitError(error);
-                Log.e(LOG_TAG, spotifyError.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Track> tracks) {
-            if(tracks != null) {
-                // Convert the List<Track> into a ArrayList<ParcelableTrack>, store in the private
-                // instance variable in the outer class and set the adapter on the RecyclerView.
-                trackList = new ArrayList<>();
-                int imgSizeInPixels = (int) getResources().getDimension(R.dimen.thumbnail_size);
-                for(Track track : tracks){
-                    trackList.add(new ParcelableTrack(track,imgSizeInPixels));
-                }
-                setAdapter();
-            }
-        }
     }
 }
