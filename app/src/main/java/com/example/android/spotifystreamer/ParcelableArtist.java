@@ -5,55 +5,46 @@ import android.os.Parcelable;
 
 import java.util.List;
 
+import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.Image;
-import kaaes.spotify.webapi.android.models.Track;
 
 /**
- * Parcelable version of Track
+ * Parcelable version of Artist
  */
-public class ParcelableTrack implements Parcelable {
+public class ParcelableArtist implements Parcelable {
 
     private String name;
-    private String albumName;
     private String imageUrl;
     private int imageSize;
+    private String id;
 
-    // Constructor with a Spotify API wrapper Track parameter
-    public ParcelableTrack(Track track, int imageSize){
-        name = track.name;
-        albumName = track.album.name;
+    // Constructor with a Spotify API wrapper Artist object for parameter
+    public ParcelableArtist(Artist artist, int imageSize){
+        this.name = artist.name;
         this.imageSize = imageSize;
-        imageUrl = getBestImageUrl(track.album.images);
-
+        imageUrl = getBestImageUrl(artist.images);
+        this.id = artist.id;
     }
 
     // Constructor from a parcel
-    public ParcelableTrack(Parcel source) {
+    public ParcelableArtist(Parcel source) {
         name = source.readString();
-        albumName = source.readString();
         imageUrl = source.readString();
         imageSize = source.readInt();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
+        id = source.readString();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
-        dest.writeString(albumName);
         dest.writeString(imageUrl);
         dest.writeInt(imageSize);
+        dest.writeString(id);
     }
 
     // Getters
     public String getName() {
         return name;
-    }
-    public String getAlbumName() {
-        return albumName;
     }
     public String getImageUrl() {
         return imageUrl;
@@ -61,6 +52,10 @@ public class ParcelableTrack implements Parcelable {
     public int getImageSize() {
         return imageSize;
     }
+    public String getId() {
+        return id;
+    }
+
 
     // Returns the url for the image closest in dimension to the desired dimension set
     // by the IMAGE_SIZE constant.
@@ -88,17 +83,22 @@ public class ParcelableTrack implements Parcelable {
         return bestImage.url;
     }
 
-    public static final Parcelable.Creator<ParcelableTrack> CREATOR
-            = new Parcelable.Creator<ParcelableTrack>() {
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<ParcelableArtist> CREATOR
+            = new Parcelable.Creator<ParcelableArtist>(){
 
         @Override
-        public ParcelableTrack createFromParcel(Parcel source) {
-            return new ParcelableTrack(source);
+        public ParcelableArtist createFromParcel(Parcel source) {
+            return new ParcelableArtist(source);
         }
 
         @Override
-        public ParcelableTrack[] newArray(int size) {
-            return new ParcelableTrack[size];
+        public ParcelableArtist[] newArray(int size) {
+            return new ParcelableArtist[size];
         }
     };
 }

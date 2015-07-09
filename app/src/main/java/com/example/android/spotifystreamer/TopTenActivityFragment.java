@@ -3,7 +3,6 @@ package com.example.android.spotifystreamer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -29,10 +28,9 @@ public class TopTenActivityFragment extends Fragment {
     // Constant for the parcelable Tracks ArrayList used in onSaveInstanceState.
     private static final String STATE_TRACKS = "state tracks";
     // Instance variable for the RecyclerView to allow access in both onCreateView method (where
-    // the layout manager is set, and setAdapter method (where adapter is set)
+    // the layout manager is set) and setAdapter method (where adapter is set)
     private RecyclerView mRecyclerView;
-    // Private variable for the artist's ID number, to allow its use in both the onCreate and
-    // onCreateView methods.
+    // Private variable for the artist's ID number.
     private String artistId;
     // Stores the list of tracks and associated variables
     private ArrayList<ParcelableTrack> trackList;
@@ -48,10 +46,6 @@ public class TopTenActivityFragment extends Fragment {
         Bundle bundle = getActivity().getIntent().getExtras();
         // Retrieve the spotify Artist ID for the clicked on artist
         artistId = bundle.getString("EXTRA_ARTIST_ID");
-        // Retrieve the artist's name, and use it to set the action bar subtitle.
-        ((AppCompatActivity)getActivity())
-                .getSupportActionBar()
-                .setSubtitle(bundle.getString("EXTRA_ARTIST_NAME"));
     }
 
     @Override

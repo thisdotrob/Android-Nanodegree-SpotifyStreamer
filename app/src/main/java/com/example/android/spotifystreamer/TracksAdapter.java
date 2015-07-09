@@ -49,7 +49,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
         // Set the track thumbnail
         int imageSize = track.getImageSize();
         Picasso.with(holder.ivTrack.getContext())
-                .load(track.getImageURL())
+                .load(track.getImageUrl())
                 .resize(imageSize, imageSize)
                 .centerInside()
                 .into(holder.ivTrack);
