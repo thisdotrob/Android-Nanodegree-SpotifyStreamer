@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyError;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
+import retrofit.RetrofitError;
 
 
 /**
@@ -25,6 +27,8 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TopTenActivityFragment extends Fragment {
 
+    // Log tag
+    private final String LOG_TAG = TopTenActivityFragment.class.getSimpleName();
     // Constant for the parcelable Tracks ArrayList used in onSaveInstanceState.
     private static final String STATE_TRACKS = "state tracks";
     // Instance variable for the RecyclerView to allow access in both onCreateView method (where
@@ -85,7 +89,7 @@ public class TopTenActivityFragment extends Fragment {
     // the Spotify web API and populates the artist's top 10 tracks in the RecyclerView adapter.
     private class SearchSpotifyTask extends AsyncTask<String, Void, List<Track>> {
 
-        private final String LOG_TAG = ParcelableTrack.class.getSimpleName();
+
 
         // Constant for the country code used when requesting the top 10 tracks
         // from the Spotify web API.
@@ -93,25 +97,32 @@ public class TopTenActivityFragment extends Fragment {
 
         @Override
         protected List<Track> doInBackground(String...query) {
-            Log.d(LOG_TAG, "Getting top10 tracks");
             // Get top 10 tracks from Spotify web api
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService service = api.getService();
-            Map<String, Object> options = new HashMap<>();
-            options.put("country", SEARCH_COUNTRY);
-            return service.getArtistTopTrack(query[0], options).tracks;
+            try {
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService service = api.getService();
+                Map<String, Object> options = new HashMap<>();
+                options.put("country", SEARCH_COUNTRY);
+                return service.getArtistTopTrack(query[0], options).tracks;
+            } catch (RetrofitError error) {
+                SpotifyError spotifyError = SpotifyError.fromRetrofitError(error);
+                Log.e(LOG_TAG, spotifyError.getMessage());
+                return null;
+            }
         }
 
         @Override
         protected void onPostExecute(List<Track> tracks) {
-            // Convert the List<Track> into a ArrayList<ParcelableTrack>, store in the private
-            // instance variable in the outer class and set the adapter on the RecyclerView.
-            trackList = new ArrayList<>();
-            int imgSizeInPixels = (int) getResources().getDimension(R.dimen.thumbnail_size);
-            for(Track track : tracks){
-                trackList.add(new ParcelableTrack(track,imgSizeInPixels));
+            if(tracks != null) {
+                // Convert the List<Track> into a ArrayList<ParcelableTrack>, store in the private
+                // instance variable in the outer class and set the adapter on the RecyclerView.
+                trackList = new ArrayList<>();
+                int imgSizeInPixels = (int) getResources().getDimension(R.dimen.thumbnail_size);
+                for(Track track : tracks){
+                    trackList.add(new ParcelableTrack(track,imgSizeInPixels));
+                }
+                setAdapter();
             }
-            setAdapter();
         }
     }
 }

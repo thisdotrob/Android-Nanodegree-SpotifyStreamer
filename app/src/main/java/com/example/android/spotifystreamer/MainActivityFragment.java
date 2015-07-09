@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyError;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import retrofit.RetrofitError;
 
 
 /**
@@ -30,6 +33,8 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class MainActivityFragment extends Fragment {
 
+    // Log tag
+    private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     // Constant for the parcelable Artists ArrayList used in onSaveInstanceState.
     private static final String STATE_ARTISTS = "state artists";
     // Instance variable for the RecyclerView to allow access in both onCreateView method (where
@@ -98,8 +103,6 @@ public class MainActivityFragment extends Fragment {
         });
     }
 
-
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -128,46 +131,53 @@ public class MainActivityFragment extends Fragment {
 
         @Override
         protected List<Artist> doInBackground(String...query) {
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService service = api.getService();
-            ArtistsPager pager = service.searchArtists(query[0]);
-            return pager.artists.items;
+            try{
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService service = api.getService();
+                ArtistsPager pager = service.searchArtists(query[0]);
+                return pager.artists.items;
+            } catch (RetrofitError error) {
+                SpotifyError spotifyError = SpotifyError.fromRetrofitError(error);
+                Log.e(LOG_TAG, spotifyError.getMessage());
+                return null;
+            }
+
         }
 
         @Override
         protected void onPostExecute(List<Artist> artists) {
-            // Display no results found toast message if returned results are empty.
-            if(artists.size() == 0) {
-                clearAdapter();
-                // Display the toast message if there isn't already one displayed.
-                if(toast==null){
-                    String message = "No matching artists found";
-                    View v = getView();
-                    if(v!=null){
-                        toast = Toast.makeText(v.getContext(), message, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.BOTTOM,0,20);
-                        TextView tvToast = (TextView) toast.getView()
-                                .findViewById(android.R.id.message);
-                        if( tvToast != null) tvToast.setGravity(Gravity.CENTER);
-                        toast.show();
+            if(artists != null){
+                // Display no results found toast message if returned results are empty.
+                if(artists.size() == 0) {
+                    clearAdapter();
+                    // Display the toast message if there isn't already one displayed.
+                    if(toast==null){
+                        String message = "No matching artists found";
+                        View v = getView();
+                        if(v!=null){
+                            toast = Toast.makeText(v.getContext(), message, Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.BOTTOM,0,20);
+                            TextView tvToast = (TextView) toast.getView()
+                                    .findViewById(android.R.id.message);
+                            if( tvToast != null) tvToast.setGravity(Gravity.CENTER);
+                            toast.show();
+                        }
                     }
                 }
-            }
-            // Else, convert the List<Artist> into a ArrayList<ParcelableArtist>, store in the private
-            // instance variable in the outer class and set the adapter on the RecyclerView.
-            else {
-                // Cancel the toast on the screen if one exists
-                if(toast!=null) toast.cancel();
-                // Convert the List<Artist>
-                artistList = new ArrayList<>();
-                int imageSize = (int) getResources().getDimension(R.dimen.thumbnail_size);
-                for (Artist artist : artists) {
-                    artistList.add(new ParcelableArtist(artist,imageSize));
+                // Else, convert the List<Artist> into a ArrayList<ParcelableArtist>, store in the private
+                // instance variable in the outer class and set the adapter on the RecyclerView.
+                else {
+                    // Cancel the toast on the screen if one exists
+                    if(toast!=null) toast.cancel();
+                    // Convert the List<Artist>
+                    artistList = new ArrayList<>();
+                    int imageSize = (int) getResources().getDimension(R.dimen.thumbnail_size);
+                    for (Artist artist : artists) {
+                        artistList.add(new ParcelableArtist(artist,imageSize));
+                    }
+                    setAdapter();
                 }
-                setAdapter();
             }
         }
-
     }
-
 }
